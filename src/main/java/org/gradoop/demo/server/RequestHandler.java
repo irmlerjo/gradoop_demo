@@ -23,6 +23,7 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gradoop.common.model.api.entities.GraphHead;
 import org.gradoop.common.model.impl.pojo.EPGMEdge;
 import org.gradoop.common.model.impl.pojo.EPGMGraphHead;
 import org.gradoop.common.model.impl.pojo.EPGMVertex;
@@ -33,7 +34,7 @@ import org.gradoop.demo.server.functions.LabelMapper;
 import org.gradoop.demo.server.functions.LabelReducer;
 import org.gradoop.demo.server.functions.PropertyKeyMapper;
 import org.gradoop.demo.server.pojo.GroupingRequest;
-import org.gradoop.flink.io.impl.csv.CSVDataSource;
+import org.gradoop.demo.server.pojo.model.*;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.aggregation.functions.count.Count;
@@ -46,16 +47,23 @@ import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.CypherPatternMatching;
 import org.gradoop.flink.util.GradoopFlinkConfig;
+import org.gradoop.temporal.io.impl.csv.TemporalCSVDataSource;
+import org.gradoop.temporal.model.api.functions.TemporalPredicate;
+import org.gradoop.temporal.model.impl.TemporalGraph;
+import org.gradoop.temporal.model.impl.TemporalGraphCollection;
+import org.gradoop.temporal.model.impl.functions.predicates.*;
+import org.gradoop.temporal.model.impl.pojo.TemporalEdge;
+import org.gradoop.temporal.model.impl.pojo.TemporalGraphHead;
+import org.gradoop.temporal.model.impl.pojo.TemporalVertex;
+import org.gradoop.temporal.util.TemporalGradoopConfig;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -74,7 +82,7 @@ public class RequestHandler {
   private final String META_FILENAME = "/metadata.json";
 
   private static final ExecutionEnvironment ENV = ExecutionEnvironment.createLocalEnvironment();
-  private GradoopFlinkConfig config = GradoopFlinkConfig.createConfig(ENV);
+  private TemporalGradoopConfig config = TemporalGradoopConfig.createConfig(ENV);
 
   /**
    * Takes a database name via a POST request and returns the keys of all
@@ -109,7 +117,7 @@ public class RequestHandler {
       return Response.serverError().build();
     }
   }
-
+/*
   @POST
   @Path("/cypher")
   @Produces("application/x-www-form-urlencoded;charset=utf-8")
@@ -118,11 +126,11 @@ public class RequestHandler {
           @FormParam("query") String query,
           @DefaultValue("false") @FormParam("attacheData") boolean attacheData) {
     //load the database
-    String path = RequestHandler.class.getResource("/data/" + databaseName).getPath();
+    String path =  RequestHandler.class.getResource("/data/" + databaseName).getPath();
 
-    CSVDataSource source = new CSVDataSource(path, config);
+    TemporalCSVDataSource source = new TemporalCSVDataSource(path, config);
 
-    LogicalGraph graph = source.getLogicalGraph();
+    TemporalGraph graph = source.getTemporalGraph();
 
     // TODO load proper statistics
     GraphStatistics graphStatistics = new GraphStatistics(1, 1, 1, 1);
@@ -131,6 +139,119 @@ public class RequestHandler {
         graphStatistics));
 
     return createResponse(res);
+  }*/
+
+    @POST
+    @Path("/difference")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    public Response difference(DifferenceRequest differenceRequest) {
+
+      String databaseName = differenceRequest.dbName;
+
+      String path = RequestHandler.class.getResource("/data/" + databaseName).getPath();
+      TemporalCSVDataSource source = new TemporalCSVDataSource(path, config);
+      TemporalGraph graph = source.getTemporalGraph();
+      try {
+        TemporalPredicate from = this.convertTemporalPredicate(differenceRequest.from);
+        TemporalPredicate to = this.convertTemporalPredicate(differenceRequest.to);
+        org.gradoop.temporal.model.api.TimeDimension timeDimension = this.convertTimeDimension(differenceRequest.timeDim);
+        TemporalGraph diff = graph.diff(from, to, timeDimension);
+        return this.createResponse(diff);
+      } catch (Exception e) {
+        e.printStackTrace();
+        return Response.status(Response.Status.BAD_REQUEST).build();
+      }
+    }
+
+  private org.gradoop.temporal.model.api.TimeDimension convertTimeDimension(TimeDimension timeDim) throws Exception {
+      if(timeDim==TimeDimension.TRANSACTIONTIME){
+        return org.gradoop.temporal.model.api.TimeDimension.TRANSACTION_TIME;
+      }
+      else if(timeDim==TimeDimension.VALIDTIME){
+        return org.gradoop.temporal.model.api.TimeDimension.VALID_TIME;
+      }
+      else{
+        throw new Exception("Not a valid Time Dimension");
+      }
+  }
+
+  private TemporalPredicate convertTemporalPredicate(TimeStamp timeStamp) throws Exception {
+      TemporalPredicate result;
+      switch (timeStamp.predicate){
+        case ASOF:
+          result= new AsOf(timeStamp.startDate.toInstant().toEpochMilli());
+          break;
+        case BETWEEN:
+          result = new Between(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case FROMTO:
+          result = new FromTo(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case OVERLAPS:
+          result= new Overlaps(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case PRECEDES:
+          result= new Precedes(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case SUCCEEDS:
+          result= new Succeeds(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case CREATEDIN:
+          result= new CreatedIn(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case DELETEDIN:
+          result= new DeletedIn(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case CONTAINEDIN:
+          result = new ContainedIn(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        case ALL:
+          result= new All();
+          break;
+        case VALIDDURING:
+          result= new ValidDuring(timeStamp.startDate.toInstant().toEpochMilli(),timeStamp.endDate.toInstant().toEpochMilli());
+          break;
+        default:
+          throw new Exception("Not a valid Predicate");
+      }
+      return result;
+  }
+
+  @POST
+  @Path("/snapshot")
+  @Consumes({ "application/json" })
+  @Produces({ "application/json" })
+  public Response snapshot(SnapshotRequest snapshotRequest) {
+
+
+
+    String databaseName = snapshotRequest.dbName;
+
+    String path = RequestHandler.class.getResource("/data/" + databaseName).getPath();
+    TemporalCSVDataSource source = new TemporalCSVDataSource(path, config);
+    TemporalGraph graph = source.getTemporalGraph();
+
+    try {
+      TemporalPredicate timeStamp = this.convertTemporalPredicate(snapshotRequest.timeStamp);
+      org.gradoop.temporal.model.api.TimeDimension timeDimension = this.convertTimeDimension(snapshotRequest.timeDim);
+      TemporalGraph snapshot = graph.snapshot(timeStamp,timeDimension);
+      return this.createResponse(snapshot);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+  }
+
+  @GET
+  @Produces({ "application/json" })
+  public Response getGraphs() {
+    ArrayList<String> result = new ArrayList<>();
+    result.add("Citibike");
+    result.add("Citibike1");
+    result.add("Citibike10");
+    result.add("Citibike100");
+    return Response.ok().entity(result).build();
   }
 
   /**
@@ -140,9 +261,9 @@ public class RequestHandler {
    */
   private JSONObject computeKeysAndLabels(String databaseName) throws IOException {
 
-    String path = RequestHandler.class.getResource("/data/" + databaseName).getPath();
-
-    CSVDataSource source = new CSVDataSource(path, config);
+    URL resource = RequestHandler.class.getResource("/data/"+databaseName);
+    String path = resource.getPath();
+    TemporalCSVDataSource source = new TemporalCSVDataSource(path, config);
 
     LogicalGraph graph = source.getLogicalGraph();
 
@@ -175,10 +296,9 @@ public class RequestHandler {
    * @throws IOException if reading fails
    * @throws JSONException if JSON creation fails
    */
-  private JSONObject readKeysAndLabels(String databaseName) throws IOException, JSONException {
-    String dataPath = RequestHandler.class.getResource("/data/" + databaseName).getFile();
-    String content =
-      new String(Files.readAllBytes(Paths.get(dataPath + META_FILENAME)), StandardCharsets.UTF_8);
+  private JSONObject readKeysAndLabels(String databaseName) throws IOException, JSONException, URISyntaxException {
+    String dataPath = Paths.get(RequestHandler.class.getResource("/data/" + databaseName).toURI()).toString();
+    String content = new String(Files.readAllBytes(Paths.get(dataPath + META_FILENAME)), StandardCharsets.UTF_8);
 
     return new JSONObject(content);
   }
@@ -317,9 +437,11 @@ public class RequestHandler {
 
     String path = RequestHandler.class.getResource("/data/" + databaseName).getPath();
 
-    CSVDataSource source = new CSVDataSource(path, config);
+    TemporalCSVDataSource source = new TemporalCSVDataSource(path, config);
 
-    LogicalGraph graph = source.getLogicalGraph();
+    TemporalGraph graph = source.getTemporalGraph();
+
+
 
     String json = CytoJSONBuilder.getJSONString(
       graph.getGraphHead().collect(),
@@ -349,9 +471,9 @@ public class RequestHandler {
 
     String path = RequestHandler.class.getResource("/data/" + databaseName).getPath();
 
-    CSVDataSource source = new CSVDataSource(path, config);
+    TemporalCSVDataSource source = new TemporalCSVDataSource(path, config);
 
-    LogicalGraph graph = source.getLogicalGraph();
+    TemporalGraph graph = source.getTemporalGraph();
 
     //if no edges are requested, remove them as early as possible
     //else, apply the normal filters
@@ -429,10 +551,10 @@ public class RequestHandler {
     return createResponse(graph);
   }
 
-  private Response createResponse(GraphCollection graph) {
-    List<EPGMGraphHead> resultHead = new ArrayList<>();
-    List<EPGMVertex> resultVertices = new ArrayList<>();
-    List<EPGMEdge> resultEdges = new ArrayList<>();
+  private Response createResponse(TemporalGraphCollection graph) {
+    List<TemporalGraphHead> resultHead = new ArrayList<>();
+    List<TemporalVertex> resultVertices = new ArrayList<>();
+    List<TemporalEdge> resultEdges = new ArrayList<>();
 
     graph.getGraphHeads().output(new LocalCollectionOutputFormat<>(resultHead));
     graph.getVertices().output(new LocalCollectionOutputFormat<>(resultVertices));
@@ -441,10 +563,10 @@ public class RequestHandler {
     return getResponse(resultHead, resultVertices, resultEdges);
   }
 
-  private Response createResponse(LogicalGraph graph) {
-    List<EPGMGraphHead> resultHead = new ArrayList<>();
-    List<EPGMVertex> resultVertices = new ArrayList<>();
-    List<EPGMEdge> resultEdges = new ArrayList<>();
+  private Response createResponse(TemporalGraph graph) {
+    List<TemporalGraphHead> resultHead = new ArrayList<>();
+    List<TemporalVertex> resultVertices = new ArrayList<>();
+    List<TemporalEdge> resultEdges = new ArrayList<>();
 
     graph.getGraphHead().output(new LocalCollectionOutputFormat<>(resultHead));
     graph.getVertices().output(new LocalCollectionOutputFormat<>(resultVertices));
@@ -454,9 +576,9 @@ public class RequestHandler {
   }
 
   private Response getResponse(
-    List<EPGMGraphHead> resultHead,
-    List<EPGMVertex> resultVertices,
-    List<EPGMEdge> resultEdges) {
+    List<TemporalGraphHead> resultHead,
+    List<TemporalVertex> resultVertices,
+    List<TemporalEdge> resultEdges) {
     try {
       ENV.execute();
       // build the response JSON from the collections

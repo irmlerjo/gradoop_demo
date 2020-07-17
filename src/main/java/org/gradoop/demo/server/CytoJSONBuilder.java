@@ -23,6 +23,9 @@ import org.gradoop.common.model.impl.pojo.EPGMEdge;
 import org.gradoop.common.model.impl.pojo.EPGMGraphHead;
 import org.gradoop.common.model.impl.pojo.EPGMVertex;
 import org.gradoop.common.model.impl.properties.Property;
+import org.gradoop.temporal.model.impl.pojo.TemporalEdge;
+import org.gradoop.temporal.model.impl.pojo.TemporalGraphHead;
+import org.gradoop.temporal.model.impl.pojo.TemporalVertex;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +88,7 @@ public class CytoJSONBuilder {
    * @param edges     the edges
    * @return a cytoscape-conform JSON
    * @throws JSONException if the creation of the JSON fails
-   */
+   *
   static String getJSONString(List<EPGMGraphHead> graphHeads, List<EPGMVertex> vertices, List<EPGMEdge> edges)
     throws JSONException {
 
@@ -155,7 +158,7 @@ public class CytoJSONBuilder {
     returnedJSON.put(EDGES, edgeArray);
 
     return returnedJSON.toString();
-  }
+  }*/
 
   /**
    * Takes a JSON containing a logical graph and converts it into a cytoscape-conform JSON.
@@ -220,6 +223,86 @@ public class CytoJSONBuilder {
       edgeArray.put(edgeObject);
     }
     returnedJSON.put(EDGES, edgeArray);
+    return returnedJSON.toString();
+  }
+
+  /**
+   * Takes a Temporal graph and converts it into a cytoscape-conform JSON.
+   *
+   * @param graphHeads the graph heads
+   * @param vertices  the vertices
+   * @param edges     the edges
+   * @return a cytoscape-conform JSON
+   * @throws JSONException if the creation of the JSON fails
+   */
+  static String getJSONString(List<TemporalGraphHead> graphHeads, List<TemporalVertex> vertices, List<TemporalEdge> edges)
+          throws JSONException {
+
+    JSONObject returnedJSON = new JSONObject();
+
+    returnedJSON.put(TYPE, "graph");
+
+    List<JSONObject> graphObjects = graphHeads.stream().map(graphHead -> {
+      try {
+        JSONObject graphObject = new JSONObject();
+
+        JSONObject graphProperties = new JSONObject();
+        graphObject.put(IDENTIFIER, graphHead.getId());
+        graphObject.put(LABEL, graphHead.getLabel());
+        if (graphHead.getProperties() != null) {
+          for (Property prop : graphHead.getProperties()) {
+            graphProperties.put(prop.getKey(), prop.getValue());
+          }
+        }
+        return graphObject.put(PROPERTIES, graphProperties);
+      } catch (JSONException e) {
+        throw new RuntimeException("Foobar");
+      }
+    }).collect(Collectors.toList());
+
+    returnedJSON.put(GRAPHS, graphObjects);
+
+    JSONArray vertexArray = new JSONArray();
+    for (TemporalVertex vertex : vertices) {
+      JSONObject vertexObject = new JSONObject();
+      JSONObject vertexData = new JSONObject();
+
+      vertexData.put(IDENTIFIER, vertex.getId());
+      vertexData.put(LABEL, vertex.getLabel());
+      JSONObject vertexProperties = new JSONObject();
+      if (vertex.getProperties() != null) {
+        for (Property prop : vertex.getProperties()) {
+          vertexProperties.put(prop.getKey(), prop.getValue());
+        }
+      }
+      vertexData.put(PROPERTIES, vertexProperties);
+      vertexObject.put(DATA, vertexData);
+      vertexArray.put(vertexObject);
+    }
+    returnedJSON.put(VERTICES, vertexArray);
+
+    JSONArray edgeArray = new JSONArray();
+    for (TemporalEdge edge : edges) {
+      JSONObject edgeObject = new JSONObject();
+      JSONObject edgeData = new JSONObject();
+      edgeData.put(EDGE_SOURCE, edge.getSourceId());
+      edgeData.put(EDGE_TARGET, edge.getTargetId());
+      edgeData.put(IDENTIFIER, edge.getId());
+      edgeData.put(LABEL, edge.getLabel());
+      JSONObject edgeProperties = new JSONObject();
+      if (edge.getProperties() != null) {
+        for (Property prop : edge.getProperties()) {
+          edgeProperties.put(prop.getKey(), prop.getValue());
+        }
+      }
+      edgeData.put(PROPERTIES, edgeProperties);
+      edgeObject.put(DATA, edgeData);
+      edgeArray.put(edgeObject);
+    }
+
+
+    returnedJSON.put(EDGES, edgeArray);
+
     return returnedJSON.toString();
   }
 }
