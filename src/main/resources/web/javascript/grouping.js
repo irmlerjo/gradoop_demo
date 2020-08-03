@@ -597,10 +597,10 @@ function initializeAggregateFunctionMenus(keys) {
     keys.vertexKeys
         .filter(k => {return k.numerical})
         .forEach(key => {
-             aggrPrefixes.forEach(prefix => {
-                 let functionName = prefix + key.name;
-                 vertexAggrFuncs.append($("<option value='" + functionName + "'>" + functionName + "</option>"))
-             });
+            aggrPrefixes.forEach(prefix => {
+                let functionName = prefix + key.name;
+                vertexAggrFuncs.append($("<option value='" + functionName + "'>" + functionName + "</option>"))
+            });
         });
 
     keys.edgeKeys

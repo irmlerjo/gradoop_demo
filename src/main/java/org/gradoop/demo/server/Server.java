@@ -20,9 +20,8 @@ import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
-import org.glassfish.grizzly.http.server.HttpHandler;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
+import org.glassfish.grizzly.http.server.*;
+import org.gradoop.demo.server.gen.io.swagger.api.RestApplication;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -37,14 +36,28 @@ public class Server {
    * URI that specifies where the server is run.
    */
   private static final URI BASE_URI = getBaseURI();
+
+  /**
+   * URI that specifies where the server is run.
+   */
+  private static final URI BASE_URI_TEMPORAL = getBaseURITemporal();
   /**
    * Default port
    */
   private static final int PORT = 2342;
   /**
+   * Alternate port for Temporal Graph
+   */
+  private static final int PORT_TEMPORAL = 2347;
+  /**
    * Path to demo application
    */
   private static final String APPLICATION_PATH = "gradoop/html/grouping.html";
+
+  /**
+   * Path to temporal Angular application
+   */
+  private static final String ANGULAR_PATH = "temporal/dist/ClientTemporalGraph/";
 
   /**
    * Creates the base URI.
@@ -55,20 +68,40 @@ public class Server {
   }
 
   /**
+   * Creates the base URI.
+   * @return Base URI
+   */
+  private static URI getBaseURITemporal() {
+    return UriBuilder.fromUri("http://localhost/").port(PORT_TEMPORAL).build();
+  }
+
+  /**
    * Starts the server and adds the request handlers.
    *
    * @return the running server
    * @throws IOException if server creation fails
    */
-  private static HttpServer startServer() throws IOException {
+  private static HttpServer startServerTemporal() throws IOException {
     System.out.println("Starting grizzly...");
-    ResourceConfig rc = new PackagesResourceConfig("org/gradoop/demo/server");
+    // Init with server Config
+    ResourceConfig rc = new PackagesResourceConfig("org/gradoop/demo/server/gen/io/swagger/api");
+    rc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
+    HttpServer server = GrizzlyServerFactory.createHttpServer(BASE_URI_TEMPORAL, rc);
+    //Add new Client Http Handler for Temporal Graph Support
+    HttpHandler angularHandler = new StaticHttpHandler(
+     Server.class.getResource("/temporal").getPath());
+    server.getServerConfiguration().addHttpHandler( angularHandler, "/temporal" );
+    return server;
+  }
+
+  private static HttpServer startServer() throws IOException {
+    ResourceConfig rc = new PackagesResourceConfig("org/gradoop/demo/server/oldApi");
     rc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
     HttpServer server = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
-    HttpHandler staticHandler = new StaticHttpHandler(
-      Server.class.getResource("/web").getPath());
-    server.getServerConfiguration().addHttpHandler( staticHandler, "/gradoop" );
-
+    //Add Client Http Handler
+    HttpHandler groupingHandler = new StaticHttpHandler(
+            Server.class.getResource("/web").getPath());
+    server.getServerConfiguration().addHttpHandler( groupingHandler, "/gradoop" );
     return server;
   }
 
@@ -81,8 +114,12 @@ public class Server {
   public static void main(String[] args) throws IOException {
     HttpServer httpServer = startServer();
     System.out.printf("org.gradoop.demos.grouping.server started at %s%s%n" +
-      "Press any key to stop it.%n", getBaseURI(), APPLICATION_PATH);
+            "Press any key to stop it.%n", getBaseURI(), APPLICATION_PATH);
+    HttpServer httpServerTemporal = startServerTemporal();
+    System.out.printf("org.gradoop.demos.grouping.server started at %s%s%n" +
+            "Press any key to stop it.%n", getBaseURITemporal(), ANGULAR_PATH);
     System.in.read();
     httpServer.stop();
+    httpServerTemporal.stop();
   }
 }

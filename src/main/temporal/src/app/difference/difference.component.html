@@ -1,0 +1,18 @@
+<div class="content2" fxLayout="column" fxFlexFill>
+
+    <div fxFlex="350px" class="selections">
+        <app-select-graph (dbName)="onDbNameChanged($event)" style="display:block;"></app-select-graph>
+        <app-time-stamp (timeStamp)="onFromChanged($event)" label="From" style="display:block;">
+        </app-time-stamp>
+        <app-time-stamp (timeStamp)="onToChanged($event)" label="To" style="display:block;">
+        </app-time-stamp>
+        <mat-radio-group [(ngModel)]="timeDim">
+            <mat-radio-button value="valid">Valid Time</mat-radio-button>
+            <mat-radio-button value="transaction">Transaction Time</mat-radio-button>
+        </mat-radio-group>
+    </div>
+    <button mat-button (click)="onExecute()">Execute</button>
+    <div fxFlex="500px" id="differenceCanvas" class="canvas"></div>
+
+
+</div>
