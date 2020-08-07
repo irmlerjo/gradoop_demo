@@ -1,18 +1,19 @@
 package org.gradoop.demo.server.gen.io.swagger.api;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.gradoop.demo.server.TemporalGraphService;
 import org.gradoop.demo.server.gen.io.swagger.model.Graph;
 import org.gradoop.demo.server.gen.io.swagger.model.GroupingRequest;
-import org.gradoop.demo.server.gen.io.swagger.model.SnapshotRequest;
 
-import java.util.Map;
-import java.util.List;
-import javax.validation.constraints.*;
 import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 @Path("/grouping")
 @Api(description = "the grouping API")
@@ -29,6 +30,10 @@ public class GroupingApi {
     })
     public Response grouping(@Valid GroupingRequest groupingRequest) {
         TemporalGraphService temporalGraphService = new TemporalGraphService();
-        return temporalGraphService.grouping(groupingRequest);
+        try {
+            return Response.ok(temporalGraphService.grouping(groupingRequest)).build();
+        } catch (Exception e) {
+            return Response.serverError().build();
+        }
     }
 }

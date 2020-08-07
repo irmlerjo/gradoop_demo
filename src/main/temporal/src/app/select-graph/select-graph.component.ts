@@ -10,7 +10,6 @@ export class SelectGraphComponent implements OnInit {
 
   @Output("dbName") dbEvent = new EventEmitter<string>();
 
-
   public graphs: string[]=[];
   public selectedGraph:string;
   constructor(public restService:RestService) {

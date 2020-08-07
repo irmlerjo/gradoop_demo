@@ -2,6 +2,8 @@ import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import * as cytoscape from 'cytoscape';
 import { Graph, Node, EdgeData, NodeData } from 'src/gen/generatedAngular';
 import { Observable, Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { DetailInfoComponent } from '../detail-info/detail-info.component';
 
 @Component({
   selector: 'app-graph-canvas',
@@ -109,7 +111,16 @@ export class GraphCanvasComponent implements OnInit {
     minTemp: 1.0,
   };
 
-  constructor() {
+  constructor(public dialog: MatDialog) {
+  }
+
+  openDialog(nodeData: NodeData, edgeData: EdgeData) {
+    this.dialog.open(DetailInfoComponent, {
+      data: {
+        nodeData: nodeData,
+        edgeData: edgeData
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -118,6 +129,10 @@ export class GraphCanvasComponent implements OnInit {
       this.draw();
     });
   }
+  ngOnDestroy(): void {
+    this.drawSubscription.unsubscribe();
+  }
+
 
   draw() {
     this.cy.elements().remove();
@@ -274,16 +289,16 @@ export class GraphCanvasComponent implements OnInit {
           console.log(node.data());
 
           this.cy.elements().addClass('faded');
-          neighborhood.removeClass('faded');  
+          neighborhood.removeClass('faded');
 
-          let nodeData:EdgeData = node.data();
-          this.showNodeInformation(nodeData);
+          let nodeData: NodeData = node.data();
+          this.openDialog(nodeData,null);
         });
         this.cy.on('tap', 'edge', (e) => {
           let edge = e.target;
-          let edgeData:EdgeData = edge.data();
-          this.showEdgeInformation(edgeData);
-          
+          let edgeData: EdgeData = edge.data();
+          this.openDialog(null,edgeData);
+
         });
         // remove fading by clicking somewhere else
         this.cy.on('tap', (e) => {
@@ -313,14 +328,4 @@ export class GraphCanvasComponent implements OnInit {
       this.colorMap[label] = [r, g, b];
     });
   }
-
-  showEdgeInformation(edgeData:EdgeData){
-    //Show Tooltip with Edge Data
-    console.log(edgeData);
-  }
-  showNodeInformation(nodeData:NodeData){
-    //Show Tooltip with Node Data
-    console.log(nodeData);
-  }
-
 }

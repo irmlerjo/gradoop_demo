@@ -11,11 +11,12 @@
  */
 import { Edge } from './edge';
 import { Node } from './node';
+import { NodeData } from './nodeData';
 
 
 export interface Graph { 
     edges?: Array<Edge>;
     nodes?: Array<Node>;
     type?: string;
-    graphs?: Node;
+    graphs?: NodeData;
 }

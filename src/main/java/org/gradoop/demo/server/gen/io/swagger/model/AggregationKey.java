@@ -1,12 +1,10 @@
 package org.gradoop.demo.server.gen.io.swagger.model;
 
-import javax.validation.constraints.*;
-import javax.validation.Valid;
-
-
-import io.swagger.annotations.*;
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.Valid;
+import java.util.Objects;
 
 
 public class AggregationKey   {

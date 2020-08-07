@@ -1,62 +1,64 @@
 <div class="content3" fxFill fxLayout="column">
 
     <!--<form #createForm="ngForm" [formGroup]="groupingForm"></form>-->
-        <div ngFlex class="selections">
-            <app-select-graph (dbName)="onDbNameChanged($event)"></app-select-graph>
-            <br>
-            <button mat-stroked-button color="primary" (click)="addGroupingKey()">Add Grouping Key</button>
-            <br>
-            <div *ngFor="let groupingKey of groupingKeys;let index=index;trackBy:trackByIndex;">
-                <app-grouping-key [(groupingKey)]="groupingKeys[index]" [(keysAndLabels)]="keysAndLabels" (groupingKeyRemoved)="removeGroupingKey($event)"><!--[groupingForm]="groupingForm"-->
-                </app-grouping-key>
-            </div>
-            <button mat-stroked-button color="primary" (click)="addAggregationFunction()">Add Aggregation Function</button>
-            <button mat-stroked-button color="warn" (click)="removeAggregationFunction()"
-                *ngIf="aggregationFunctions.length>0">-</button>
-            <mat-card
-                *ngFor="let aggregationFunction of aggregationFunctions;let index=index;trackBy:trackByIndexAggregate;">
-                <!--Aggregation Function, always required-->
-                <mat-form-field matLine>
-                    <mat-label>AggregationType</mat-label>
-                    <mat-select [(ngModel)]="aggregationFunctions[index].aggregationType">
-                        <mat-option *ngFor="let aggrFun of aggregationFunctionEnum | enumKeysPipe" [value]="aggrFun">
-                            {{aggrFun}}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <!--for Vertex or Edge, always required-->
-                <mat-button-toggle-group [(ngModel)]="aggregationFunctions[index].forEdges" aria-label="Font Style">
-                    <mat-button-toggle [value]=false>Vertices</mat-button-toggle>
-                    <mat-button-toggle [value]=true>Edges</mat-button-toggle>
-                </mat-button-toggle-group>
-                <!-- Property for regular aggregation Functions -->
-                <mat-form-field matLine
-                    *ngIf="isAggrPropertyFieldRequired(aggregationFunctions[index].aggregationType)">
-                    <mat-label>Property</mat-label>
-                    <mat-select [(ngModel)]="aggregationFunctions[index].property">
-                        <mat-option *ngFor="let prop of propertiesWithNumericalValues()" [value]="prop">
-                            {{prop}}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <!--Time Dimension for temporal Aggregations-->
-                <mat-button-toggle-group *ngIf="isAggrTimeDimRequired(aggregationFunctions[index].aggregationType)"
-                    [(ngModel)]="aggregationFunctions[index].timeDim">
-                    <mat-button-toggle [value]="timeDimensionEnum.VALIDTIME">Valid Time</mat-button-toggle>
-                    <mat-button-toggle [value]="timeDimensionEnum.TRANSACTIONTIME">Transaction Time</mat-button-toggle>
-                </mat-button-toggle-group>
-                <!--TimeField Required for temporal operations-->
-                <mat-button-toggle-group *ngIf="isAggrTimeFieldRequired(aggregationFunctions[index].aggregationType)"
-                    [(ngModel)]="aggregationFunctions[index].timeField">
-                    <mat-button-toggle [value]="timeFieldEnum.FROM">FROM</mat-button-toggle>
-                    <mat-button-toggle [value]="timeFieldEnum.TO">TO</mat-button-toggle>
-                </mat-button-toggle-group>
-            </mat-card>
-
-            
+    <div ngFlex class="selections">
+        <app-select-graph (dbName)="onDbNameChanged($event)"></app-select-graph>
+        <br>
+        <button mat-stroked-button color="primary" (click)="addGroupingKey()">Add Grouping Key</button>
+        <br>
+        <div *ngFor="let groupingKey of groupingKeys;let index=index;trackBy:trackByIndex;">
+            <app-grouping-key [(groupingKey)]="groupingKeys[index]" [(keysAndLabels)]="keysAndLabels"
+                (groupingKeyRemoved)="removeGroupingKey($event)">
+                <!--[groupingForm]="groupingForm"-->
+            </app-grouping-key>
         </div>
-        <button type=submit fxFlex=10 mat-button color="primary" (click)="onExecute()">Execute</button>
+        <button mat-stroked-button color="primary" (click)="addAggregationFunction()">Add Aggregation Function</button>
+        <button mat-stroked-button color="warn" (click)="removeAggregationFunction()"
+            *ngIf="aggregationFunctions.length>0">-</button>
+        <mat-card
+            *ngFor="let aggregationFunction of aggregationFunctions;let index=index;trackBy:trackByIndexAggregate;">
+            <!--Aggregation Function, always required-->
+            <mat-form-field matLine>
+                <mat-label>AggregationType</mat-label>
+                <mat-select [(ngModel)]="aggregationFunctions[index].aggregationType">
+                    <mat-option *ngFor="let aggrFun of aggregationFunctionEnum | enumKeysPipe" [value]="aggrFun">
+                        {{aggrFun}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <!--for Vertex or Edge, always required-->
+            <mat-button-toggle-group [(ngModel)]="aggregationFunctions[index].forEdges" aria-label="Font Style">
+                <mat-button-toggle [value]=false>Vertices</mat-button-toggle>
+                <mat-button-toggle [value]=true>Edges</mat-button-toggle>
+            </mat-button-toggle-group>
+            <!-- Property for regular aggregation Functions -->
+            <mat-form-field matLine *ngIf="isAggrPropertyFieldRequired(aggregationFunctions[index].aggregationType)">
+                <mat-label>Property</mat-label>
+                <mat-select [(ngModel)]="aggregationFunctions[index].property">
+                    <mat-option *ngFor="let prop of propertiesWithNumericalValues()" [value]="prop">
+                        {{prop}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <!--Time Dimension for temporal Aggregations-->
+            <mat-button-toggle-group *ngIf="isAggrTimeDimRequired(aggregationFunctions[index].aggregationType)"
+                [(ngModel)]="aggregationFunctions[index].timeDim">
+                <mat-button-toggle [value]="timeDimensionEnum.VALIDTIME">Valid Time</mat-button-toggle>
+                <mat-button-toggle [value]="timeDimensionEnum.TRANSACTIONTIME">Transaction Time</mat-button-toggle>
+            </mat-button-toggle-group>
+            <!--TimeField Required for temporal operations-->
+            <mat-button-toggle-group *ngIf="isAggrTimeFieldRequired(aggregationFunctions[index].aggregationType)"
+                [(ngModel)]="aggregationFunctions[index].timeField">
+                <mat-button-toggle [value]="timeFieldEnum.FROM">FROM</mat-button-toggle>
+                <mat-button-toggle [value]="timeFieldEnum.TO">TO</mat-button-toggle>
+            </mat-button-toggle-group>
+        </mat-card>
+
+
+    </div>
+    <button fxFlex=10 mat-button color="primary" (click)="onExecute()">Execute</button>
     <!--</form>-->
-    <app-graph-canvas fxFlex [forceLayout]="true" [drawGraphEvent]="drawGraphSubject.asObservable()" [showDiff]="false"></app-graph-canvas>
+    <app-graph-canvas fxFlex [forceLayout]="true" [drawGraphEvent]="drawGraphSubject.asObservable()" [showDiff]="false">
+    </app-graph-canvas>
 
 </div>

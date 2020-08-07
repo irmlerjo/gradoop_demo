@@ -1,18 +1,20 @@
 package org.gradoop.demo.server.gen.io.swagger.api;
 
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.gradoop.demo.server.TemporalGraphService;
 import org.gradoop.demo.server.gen.io.swagger.model.DifferenceRequest;
-import org.gradoop.demo.server.pojo.model.Graph;
+import org.gradoop.demo.server.gen.io.swagger.model.Graph;
 
-import java.util.Map;
-import java.util.List;
-import javax.validation.constraints.*;
 import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 @Path("/difference")
 @Api(description = "the difference API")
@@ -29,6 +31,12 @@ public class DifferenceApi {
     })
     public Response difference(@Valid DifferenceRequest differenceRequest) {
         TemporalGraphService temporalGraphService = new TemporalGraphService();
-        return temporalGraphService.difference(differenceRequest);
+        try {
+            return Response.ok(temporalGraphService.difference(differenceRequest)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            //Currently all failed requests return an internal server error, even if the api is used incorrectly. (should be 400)
+            return Response.serverError().build();
+        }
     }
 }

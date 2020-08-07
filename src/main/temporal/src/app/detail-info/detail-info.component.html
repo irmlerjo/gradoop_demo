@@ -1,0 +1,26 @@
+<div *ngIf="isNodeInfo">
+    <h1 mat-dialog-title>Label:{{nodeData.label}}</h1>
+    <div mat-dialog-content>
+        <h3>Id:{{nodeData.id}}</h3>
+        <h3>Properties:</h3>
+        <div *ngFor="let prop of nodeData.properties">
+           {{prop.key}} : {{prop.value}}
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <button mat-button (click)="clickClose()">Close</button>
+    </div>
+</div>
+
+<div *ngIf="!isNodeInfo">
+    <h1 mat-dialog-title>Label:{{edgeData.label}}</h1>
+    <div mat-dialog-content>
+        <h5>Id:{{edgeData.id}}</h5>
+        <h5>Source:{{edgeData.source}}</h5>
+        <h5>Target:{{edgeData.target}}</h5>
+        <h3>Properties:</h3>
+        <div *ngFor="let prop of edgeData.properties">
+            {{prop.key}} : {{prop.value}}
+        </div>
+    </div>
+</div>

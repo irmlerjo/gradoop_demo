@@ -69,7 +69,7 @@ import java.util.Set;
 /**
  * Handles REST requests to the server.
  */
-@Path("/nonTemporal")
+@Path("/")
 public class RequestHandler {
 
   private final String META_FILENAME = "/metadata.json";

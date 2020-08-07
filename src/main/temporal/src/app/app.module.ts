@@ -35,6 +35,7 @@ import { GroupingKeyComponent } from './grouping-key/grouping-key.component';
 import { AggregationFunctionComponent } from './aggregation-function/aggregation-function.component';
 import { GraphCanvasComponent } from './graph-canvas/graph-canvas.component';
 import {MatIconModule} from '@angular/material/icon';
+import { DetailInfoComponent } from './detail-info/detail-info.component';
 
 
 @NgModule({
@@ -49,7 +50,8 @@ import {MatIconModule} from '@angular/material/icon';
     EnumKeysPipe,
     GroupingKeyComponent,
     AggregationFunctionComponent,
-    GraphCanvasComponent
+    GraphCanvasComponent,
+    DetailInfoComponent
   ],
   imports: [
     BrowserModule,

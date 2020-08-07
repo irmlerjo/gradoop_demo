@@ -293,10 +293,13 @@ public class CytoJSONBuilder {
       edgeData.put(EDGE_TARGET, edge.getTargetId());
       edgeData.put(IDENTIFIER, edge.getId());
       edgeData.put(LABEL, edge.getLabel());
-      JSONObject edgeProperties = new JSONObject();
+      JSONArray edgeProperties = new JSONArray();
       if (edge.getProperties() != null) {
         for (Property prop : edge.getProperties()) {
-          edgeProperties.put(prop.getKey(), prop.getValue());
+          JSONObject singleProperty = new JSONObject();
+          singleProperty.put("key", prop.getKey());
+          singleProperty.put("value", prop.getValue());
+          edgeProperties.put(singleProperty);
         }
       }
       edgeData.put(PROPERTIES, edgeProperties);
