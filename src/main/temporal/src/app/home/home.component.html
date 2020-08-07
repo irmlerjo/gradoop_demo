@@ -1,5 +1,11 @@
-<mat-tab-group dynamicHeight>
-    <mat-tab label="Snapshot"><ng-template matTabContent><app-snapshot></app-snapshot></ng-template> </mat-tab>
-    <mat-tab label="Difference"> <ng-template matTabContent><app-difference></app-difference></ng-template> </mat-tab>
-    <mat-tab label="Grouping"> <ng-template matTabContent><app-grouping></app-grouping> </ng-template> </mat-tab>
-  </mat-tab-group>
+<div id="wrapper"> <!-- give it an id -->
+  <div fxLayout="row" fxLayoutGap="16px" fxFill>
+      <div fxFlex="100" fxFill>
+          <mat-tab-group id="tab-group"> <!-- give it an id -->
+            <mat-tab label="Snapshot"><ng-template matTabContent><app-snapshot></app-snapshot></ng-template> </mat-tab>
+            <mat-tab label="Difference"> <ng-template matTabContent><app-difference></app-difference></ng-template> </mat-tab>
+            <mat-tab label="Grouping"> <ng-template matTabContent><app-grouping></app-grouping> </ng-template> </mat-tab>
+          </mat-tab-group>
+      </div>
+  </div>
+</div>

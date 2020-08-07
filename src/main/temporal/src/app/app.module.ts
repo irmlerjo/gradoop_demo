@@ -13,7 +13,7 @@ import { GroupingComponent } from './grouping/grouping.component'
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { TimeStampComponent } from './time-stamp/time-stamp.component';
-import { NgxMatDatetimePickerModule, NgxMatTimepickerModule } from '@angular-material-components/datetime-picker';
+import { NgxMatDatetimePickerModule, NgxMatTimepickerModule, NgxMatNativeDateModule } from '@angular-material-components/datetime-picker';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatInputModule} from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -31,6 +31,11 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { EnumKeysPipe } from './enum-keys-pipe';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { GroupingKeyComponent } from './grouping-key/grouping-key.component';
+import { AggregationFunctionComponent } from './aggregation-function/aggregation-function.component';
+import { GraphCanvasComponent } from './graph-canvas/graph-canvas.component';
+import {MatIconModule} from '@angular/material/icon';
+
 
 @NgModule({
   declarations: [
@@ -41,7 +46,10 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     DifferenceComponent,
     GroupingComponent,
     TimeStampComponent,
-    EnumKeysPipe
+    EnumKeysPipe,
+    GroupingKeyComponent,
+    AggregationFunctionComponent,
+    GraphCanvasComponent
   ],
   imports: [
     BrowserModule,
@@ -57,7 +65,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     ReactiveFormsModule,
     MatButtonModule,
     NgxMatDatetimePickerModule,
-    NgxMatMomentModule,
+    NgxMatNativeDateModule,
     HttpClientModule,
     MatGridListModule,
     MatListModule,
@@ -66,7 +74,8 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     MatCardModule,
     MatSlideToggleModule,
     MatDividerModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatIconModule,
   ],
   providers: [
   DefaultService,

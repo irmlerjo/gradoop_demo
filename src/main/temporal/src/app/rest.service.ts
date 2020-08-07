@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { SnapshotRequest, TimeDimension, TemporalPredicate, DefaultService, TimeStamp, DifferenceRequest, Graph, GroupingRequest,GroupingKey, AggregationKey, KeysAndLabels, KeysAndLabelsVertexKeys } from 'src/gen/generatedAngular';
+import { TimeSpan } from './time-span';
 
 @Injectable({
   providedIn: 'root'
@@ -105,6 +106,13 @@ export class RestService {
   }
   public getGraph(dbName:string):Promise<Graph>{
     return this.defaultService.getGraph(dbName).toPromise();    
+  }
+  public getValidTimes(dbName:string):TimeSpan{
+    //Backend Call for Valid Times for this db.
+    return {
+      start: new Date('01 Jan 2018 00:00:00 GMT'),
+      end: new Date('01 Jan 2019 00:00:00 GMT')
+    }
   }
 
 }

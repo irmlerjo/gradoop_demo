@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { RestService } from '../rest.service';
 
 @Component({
@@ -9,6 +9,7 @@ import { RestService } from '../rest.service';
 export class SelectGraphComponent implements OnInit {
 
   @Output("dbName") dbEvent = new EventEmitter<string>();
+
 
   public graphs: string[]=[];
   public selectedGraph:string;

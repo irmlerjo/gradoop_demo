@@ -6,15 +6,18 @@
       {{predicate.value}}
     </mat-option>
   </mat-select>
+  <mat-error>
+
+  </mat-error>
 </mat-form-field>
 <mat-form-field matLine>
-  <input matInput [ngxMatDatetimePicker]="startPicker" placeholder="Select a date" (change)="publishChanges()" [disabled]="!selectedPredicate">
+  <input matInput [ngxMatDatetimePicker]="startPicker" placeholder="Select a date" (change)="publishChanges()" [disabled]="!selectedPredicate" [min]="timeSpan.start"  [max]="timeSpan.end">
   <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-  <ngx-mat-datetime-picker #startPicker>
+  <ngx-mat-datetime-picker #startPicker >
   </ngx-mat-datetime-picker>
 </mat-form-field>
 <mat-form-field matLine>
-  <input matInput [ngxMatDatetimePicker]="endPicker" placeholder="Select an Enddate" (change)="publishChanges()" [disabled]="!selectedPredicate?.endRequired">
+  <input matInput [ngxMatDatetimePicker]="endPicker" placeholder="Select an Enddate" (change)="publishChanges()" [disabled]="!selectedPredicate?.endRequired" [min]="timeSpan.start"  [max]="timeSpan.end">
   <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
   <ngx-mat-datetime-picker #endPicker>
   </ngx-mat-datetime-picker>

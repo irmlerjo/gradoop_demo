@@ -1,15 +1,15 @@
-<div class="content" fxLayout="column" fxFlexFill>
+<div class="content" fxLayout="column" fxFill>
 
-    <div fxFlex="350px" class="selections">
+    <div fxFlex class="selections">
         <app-select-graph (dbName)="onDbNameChanged($event)" style="display:block;"></app-select-graph>
-        <app-time-stamp (timeStamp)="onTimeStampChanged($event)" label="Timestamp" style="display:block;">
+        <app-time-stamp *ngIf="timeSpan" (timeStamp)="onTimeStampChanged($event)" label="Timestamp" style="display:block;" [timeSpan]="timeSpan">
         </app-time-stamp>
         <mat-radio-group [(ngModel)]="timeDim">
             <mat-radio-button value="valid">Valid Time</mat-radio-button>
             <mat-radio-button value="transaction">Transaction Time</mat-radio-button>
         </mat-radio-group>
     </div>
-    <button mat-button (click)="onExecute()">Execute</button>
-    <div fxFlex="500px" id="snapshotCanvas" class="canvas"></div>
+    <button mat-button color="primary" (click)="onExecute()">Execute</button>
+    <app-graph-canvas fxFlex [forceLayout]="false" [drawGraphEvent]="drawGraphSubject.asObservable()"></app-graph-canvas>
 
 </div>

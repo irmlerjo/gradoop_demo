@@ -1,0 +1,91 @@
+<mat-card style="margin-bottom:20px">
+    <mat-card-content>
+        <!--Grouping Type, always visible-->
+        <mat-form-field matLine>
+            <mat-label>Grouping Type</mat-label>
+            <mat-select [(ngModel)]="groupingKey.groupingType"
+                (selectionChange)="groupingTypeChanged()"><!-- [formControlName]="'groupingType'" required>-->
+                <mat-option *ngFor="let groupingType of groupingTypeEnum | enumKeysPipe" [value]="groupingType">
+                    {{groupingType}}
+                </mat-option>
+            </mat-select>
+            <!--<mat-error
+                *ngIf="groupingForm.controls['groupingType'].hasError('required')">
+                Must select Type of Grouping Key
+            </mat-error>-->
+        </mat-form-field>
+        <!--Decision if Grouping Key is for Vertices or Edges-->
+        <mat-button-toggle-group [(ngModel)]="groupingKey.forVertex" aria-label="Font Style">
+            <mat-button-toggle [value]=true (change)="onVertexToggleChange($event.value)">Vertices</mat-button-toggle>
+            <mat-button-toggle [value]=false (change)="onVertexToggleChange($event.value)">Edges</mat-button-toggle>
+        </mat-button-toggle-group>
+        <!--LabelSpecific, always visible-->
+        <mat-slide-toggle [(ngModel)]="groupingKey.labelSpecific">LabelSpecific
+        </mat-slide-toggle>
+        <!--Label, required when labelSpecific GroupingKey is being selected-->
+        <mat-form-field matLine
+            *ngIf="groupingKey.labelSpecific || groupingKey.groupingType===groupingTypeEnum.PROPERTY">
+            <mat-label>Label</mat-label>
+            <mat-select [(ngModel)]="groupingKey.label" (selectionChange)="labelChanged()"><!-- [formControlName]="'label'" required>-->
+                <mat-option *ngFor="let label of labelSelection" [value]="label">
+                    {{label}}
+                </mat-option>
+            </mat-select>
+            <!--<mat-error
+            *ngIf="groupingForm.controls['label'].hasError('required')">
+            Must select Label
+        </mat-error>-->
+        </mat-form-field>
+        <!--Property, required when Property Grouping is selected-->
+        <mat-form-field matLine *ngIf="groupingKey.groupingType===groupingTypeEnum.PROPERTY && groupingKey.label">
+            <mat-label>Property</mat-label>
+            <mat-select [(ngModel)]="groupingKey.property"><!-- [formControlName]="'property'" required>-->
+                <mat-option *ngFor="let key of filterKeysForLabel(groupingKey.label)" [value]="key.name">
+                    {{key.name}}
+                </mat-option>
+            </mat-select>
+            <!--<mat-error *ngIf="groupingForm.controls['property'].hasError('required')">
+                Must select Property
+            </mat-error>-->
+        </mat-form-field>
+        <!--TimeDimension, required on all temporal Grouping Keys-->
+        <mat-button-toggle-group *ngIf="isGroupingTimeDimRequired(groupingKey.groupingType)"
+            [(ngModel)]="groupingKey.timeDim">
+            <mat-button-toggle [value]="timeDimensionEnum.VALIDTIME">Valid Time</mat-button-toggle>
+            <mat-button-toggle [value]="timeDimensionEnum.TRANSACTIONTIME">Transaction Time</mat-button-toggle>
+        </mat-button-toggle-group>
+        <!--ChronoField, required on TimeStampField GroupingKey-->
+        <mat-form-field matLine *ngIf="groupingKey.groupingType===groupingTypeEnum.TIMESTAMPFIELD">
+            <mat-label>ChronoField</mat-label>
+            <mat-select [(ngModel)]="groupingKey.chronoField"><!-- [formControlName]="'chronoField'" required>-->
+                <mat-option *ngFor="let chronoField of chronoFieldEnum | enumKeysPipe" [value]="chronoField">
+                    {{chronoField}}
+                </mat-option>
+            </mat-select>
+            <!--<mat-error *ngIf="groupingForm.controls['chronoField'].hasError('required')">
+                Must select Property
+            </mat-error>-->
+        </mat-form-field>
+        <!--ChronoUnit, required on duration temporal Grouping Key-->
+        <mat-form-field matLine *ngIf="groupingKey.groupingType===groupingTypeEnum.DURATION">
+            <mat-label>ChronoUnit</mat-label>
+            <mat-select [(ngModel)]="groupingKey.chronoUnit"><!-- [formControlName]="'chronoUnit'" required>-->
+                <mat-option *ngFor="let chronoUnit of chronoUnitEnum | enumKeysPipe" [value]="chronoUnit">
+                    {{chronoUnit}}
+                </mat-option>
+            </mat-select>
+            <!--<mat-error *ngIf="groupingForm.controls['chronoUnit'].hasError('required')">
+                Must select Property
+            </mat-error>-->
+        </mat-form-field>
+        <!--TimeField, required on TimeStamp and TimeStampField Grouping Key-->
+        <mat-button-toggle-group *ngIf="isGroupingTimeFieldRequired(groupingKey.groupingType)"
+            [(ngModel)]="groupingKey.timeField">
+            <mat-button-toggle [value]="timeFieldEnum.FROM">FROM</mat-button-toggle>
+            <mat-button-toggle [value]="timeFieldEnum.TO">TO</mat-button-toggle>
+        </mat-button-toggle-group>
+    </mat-card-content>
+    <mat-card-actions [align]="'start'">
+        <button mat-button color="warn" (click)="removeGroupingKey()"><mat-icon>delete</mat-icon></button>
+    </mat-card-actions>
+</mat-card>

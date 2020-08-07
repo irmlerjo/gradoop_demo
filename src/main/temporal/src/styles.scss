@@ -2,33 +2,55 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.mat-tab-body-wrapper{
+  flex-grow: 1;
+}
 
 .selections {
     color:black;
   }
   
-  .canvas {
-    height:100%;
+  .canvas1 {
+
+    border-color:black;
+    border-width: 1px;
+    border-radius: 20px;
+    border-style:solid;   
+  }
+  .canvas2 {
+
+    border-color:black;
+    border-width: 1px;
+    border-radius: 20px;
+    border-style:solid;   
+  }
+  .canvas3 {
+
     border-color:black;
     border-width: 1px;
     border-radius: 20px;
     border-style:solid;   
   }
   
-  .sec3 {
-    background: blue;
-    color:white;
-    text-transform: uppercase
+  .content1, .content2, .content3 {
+    height:100%;
   }
   
-  .sec1, .sec2, .sec3 {
-    padding-top:20px;
-    text-align:center
+  .content1 {
+    min-width: 300px;
+    /*height: 400px;*/
   }
-  
-  .content {
+  .content2 {
+    min-width: 300px;
+    /*height: 400px;*/
+  }
+  .content3 {
     min-width: 300px;
     /*height: 400px;*/
   }
 
-  mat-card { margin-bottom: 10px; }
+  mat-card { padding-bottom: 10px; }
+
+  .mat-tab-body-wrapper{
+    flex-grow: 1;
+  }

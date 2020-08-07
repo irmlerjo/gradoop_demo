@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild, Output, EventEmitter, AfterViewInit, Inpu
 import { TemporalPredicate, TimeStamp } from 'src/gen/generatedAngular';
 import { NgxMatDatetimePicker } from '@angular-material-components/datetime-picker';
 import { Moment } from 'moment';
+import { RestService } from '../rest.service';
+import { TimeSpan } from '../time-span';
 
 
 
@@ -15,14 +17,17 @@ export interface PredicateSelectOpt{
   templateUrl: './time-stamp.component.html',
   styleUrls: ['./time-stamp.component.scss']
 })
-export class TimeStampComponent implements AfterViewInit {
+export class TimeStampComponent implements AfterViewInit,OnInit {
 
-  @ViewChild('startPicker') startPicker: NgxMatDatetimePicker<Moment>;
-  @ViewChild('endPicker') endPicker: NgxMatDatetimePicker<Moment>;
+  @ViewChild('startPicker') startPicker: NgxMatDatetimePicker<Date>;
+  @ViewChild('endPicker') endPicker: NgxMatDatetimePicker<Date>;
 
   @Output("timeStamp") timeStampEvent = new EventEmitter<TimeStamp>();
 
   @Input("label") label:string;
+
+  @Input("timeSpan")
+  public timeSpan:TimeSpan;
 
 
 
@@ -41,21 +46,23 @@ export class TimeStampComponent implements AfterViewInit {
       }
     }
   }
+  ngOnInit(){
+  }
 
   ngAfterViewInit(): void {
     this.startPicker._selectedChanged.subscribe(()=>{
-
       this.publishChanges();
     });
 
     this.endPicker._selectedChanged.subscribe(()=>{
-
       this.publishChanges();
     });
+
+    console.log(this.timeSpan);
   }
 
   publishChanges():void{
-    this.timeStampEvent.emit(<TimeStamp>{predicate:this.selectedPredicate.value,startDate:this.startPicker._selected?.toDate(),endDate:this.endPicker._selected?.toDate()});
+    this.timeStampEvent.emit(<TimeStamp>{predicate:this.selectedPredicate.value,startDate:this.startPicker._selected,endDate:this.endPicker._selected});
   }
   
 
